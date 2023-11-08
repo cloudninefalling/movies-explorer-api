@@ -22,7 +22,7 @@ module.exports.createUser = (req, res, next) => {
       })
       .catch((err) => {
         if (err.code === 11000) {
-          next(new ConflictError(err.message));
+          next(new ConflictError('Account with this email already exists'));
         } else if (err instanceof mongoose.Error.ValidationError) {
           next(new BadRequestError(err.message));
         } else next(err);
