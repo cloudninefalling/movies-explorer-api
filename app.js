@@ -15,7 +15,7 @@ const moviesRouter = require('./routes/movies');
 const { createUser, login, logout } = require('./controllers/users');
 const NotFoundError = require('./errors/NotFoundError');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
