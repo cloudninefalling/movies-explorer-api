@@ -1,4 +1,5 @@
 const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
 const Movie = require('../models/movie');
 
 module.exports.getSavedMovies = (req, res) => {
@@ -6,7 +7,6 @@ module.exports.getSavedMovies = (req, res) => {
   Movie.find({ owner: id }).then((movie) => {
     res.send(movie);
   });
-  // TODO: this probably won't work bcuz id != objId
 };
 
 module.exports.createMovie = (req, res, next) => {
@@ -45,10 +45,14 @@ module.exports.createMovie = (req, res, next) => {
 
 module.exports.deleteMovie = (req, res, next) => {
   const { id } = req.params;
-  Movie.findByIdAndDelete(id)
+  Movie.findById(id)
+    .populate('owner')
     .then((movie) => {
       if (!movie) throw new NotFoundError('Movie not found');
-      res.send(movie);
+      if (!movie.owner._id.equals(req.userId)) {
+        throw new ForbiddenError('This movie is not in your collection');
+      }
+      movie.deleteOne().then(() => res.send(movie));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
