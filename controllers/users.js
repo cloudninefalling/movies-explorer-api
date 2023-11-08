@@ -11,13 +11,18 @@ const ConflictError = require('../errors/ConflictError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
+const removePassword = (user) => {
+  const userWithoutPassword = user.toObject();
+  delete userWithoutPassword.password;
+  return userWithoutPassword;
+};
+
 module.exports.createUser = (req, res, next) => {
   const { email, password, name } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
     User.create({ email, password: hash, name })
       .then((user) => {
-        const userWithoutPassword = user.toObject();
-        delete userWithoutPassword.password;
+        const userWithoutPassword = removePassword(user);
         res.send(userWithoutPassword);
       })
       .catch((err) => {
@@ -34,12 +39,13 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
+      const userWithoutPassword = removePassword(user);
       const token = jwt.sign(
         { _id: user._id },
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
-      res.cookie('jwt', token, { maxAge: 604000000 }).send(user);
+      res.cookie('jwt', token, { maxAge: 604000000 }).send(userWithoutPassword);
     })
     .catch(next);
 };
