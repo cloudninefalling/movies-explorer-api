@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cookies = require('cookie-parser');
 const { errors } = require('celebrate');
+const cors = require('./middlewares/cors');
 // eslint-disable-next-line no-unused-expressions
 require('dotenv').config;
 
@@ -25,7 +26,8 @@ mongoose.connect(DB);
 app.use(express.json());
 app.use(requestLogger);
 
-app.use(indexRouter);
+app.use(cors);
+app.use('/', indexRouter);
 
 app.use(errorLogger);
 app.use(errors());
