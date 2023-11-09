@@ -4,7 +4,3 @@ node_modules
 
 error.log
 request.log
-
-.editorconfig
-
-.prettierrc

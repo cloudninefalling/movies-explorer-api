@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const cookies = require('cookie-parser');
 const { errors } = require('celebrate');
@@ -10,21 +9,19 @@ require('dotenv').config;
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const errorHandler = require('./middlewares/errorHandler');
 const indexRouter = require('./routes/index');
+const limiter = require('./middlewares/rateLimiter');
 
-const { PORT = 3001 } = process.env;
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 100,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-});
+// prettier-ignore
+const {
+  PORT = 3001,
+  DB = 'mongodb://127.0.0.1:27017/bitfilmsdb',
+} = process.env;
 
 const app = express();
 app.use(helmet());
 app.use(limiter);
 app.use(cookies());
-mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb');
+mongoose.connect(DB);
 app.use(express.json());
 app.use(requestLogger);
 
